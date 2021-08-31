@@ -6,7 +6,7 @@ const bookSchema = new mongoose.Schema({
     evaluate: { type: Array },
     likedBy: { type: Array },
     categoryId: { type: String, required: true },
-    prices: [{ type: Object, required: true }],
+    prices: [Object],
 })
 
 
