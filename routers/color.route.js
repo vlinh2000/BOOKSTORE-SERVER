@@ -2,15 +2,18 @@ const express = require('express');
 const router = express.Router()
 const colorController = require("../controllers/color.controller")
 
+const authMiddleware = require('../middleware/authMiddleware');
+
+
 router.get("/", colorController.color_getAll)
 
 router.get("/:colorId", colorController.color_get)
 
-router.post("/", colorController.color_post)
+router.post("/", authMiddleware.isAdmin, colorController.color_post)
 
-router.patch("/:colorId", colorController.color_patch)
+router.patch("/:colorId", authMiddleware.isAdmin, colorController.color_patch)
 
-router.delete("/:colorId", colorController.color_delete)
+router.delete("/:colorId", authMiddleware.isAdmin, colorController.color_delete)
 
 
 module.exports = router;

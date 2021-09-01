@@ -21,13 +21,12 @@ module.exports = {
     color_post: async (req, res) => {
         try {
             const colorName = await colorModel.findOne({ colorName: req.body.colorName });
-            if (colorName) {
-                res.status(200).json({ message: "Color already exists!" });
-            } else {
-                const newColor = new colorModel({ ...req.body })
-                await newColor.save();
-                res.status(200).json({ message: "Insert a color successful!" });
-            }
+            if (colorName) res.status(404).json({ message: "Color already exists!" });
+
+            const newColor = new colorModel({ ...req.body })
+            await newColor.save();
+
+            res.status(200).json({ message: "Insert a color successful!" });
         } catch (error) {
             res.status(409).json({ message: "Faild to insert color", error })
         }
@@ -36,12 +35,10 @@ module.exports = {
         const { colorId } = req.params;
         try {
             const color = await colorModel.findOne({ _id: colorId });
-            if (color) {
-                await colorModel.deleteOne({ _id: colorId })
-                res.status(200).json({ message: "Delete a color successful!" });
-            } else {
-                res.status(200).json({ message: "Color already not exists!" });
-            }
+            if (color) res.status(404).json({ message: "Color is not exists!" });
+
+            await colorModel.deleteOne({ _id: colorId })
+            res.status(200).json({ message: "Delete a color successful!" });
         } catch (error) {
             res.status(409).json({ message: "Faild to delete color", error })
         }
@@ -50,12 +47,10 @@ module.exports = {
         const { colorId } = req.params;
         try {
             const color = await colorModel.findOne({ _id: colorId });
-            if (color) {
-                await colorModel.updateOne({ _id: colorId }, { $set: { ...req.body } })
-                res.status(200).json({ message: "Update a color successful!" });
-            } else {
-                res.status(200).json({ message: "Color is not exists!" });
-            }
+            if (!color) res.status(404).json({ message: "Color is not exists!" });
+
+            await colorModel.updateOne({ _id: colorId }, { $set: { ...req.body } })
+            res.status(200).json({ message: "Update a color successful!" });
         } catch (error) {
             res.status(409).json({ message: "Faild to update color", error })
         }
