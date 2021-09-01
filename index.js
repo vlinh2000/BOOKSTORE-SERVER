@@ -14,20 +14,21 @@ const bookRouter = require('./routers/book.route');
 const categoryRouter = require('./routers/category.route');
 const colorRouter = require('./routers/color.route');
 const userRouter = require('./routers/user.route');
-
-const authMiddleware = require('./middleware/authMiddleware');
+const billRouter = require('./routers/bill.route');
 
 //connect db
 mongoose.connect("mongodb://localhost/bookstore");
 
-app.use('/books', bookRouter);
-app.use('/categories', categoryRouter);
-app.use('/colors', colorRouter);
+//middleware 
+const authMiddleware = require('./middleware/authMiddleware');
 
-app.use(authMiddleware.isAuth);
+app.use(express.static('public'));
 
-app.use('/users', userRouter);
-app.use('/bills', bookRouter);
+app.use('/api/books', bookRouter);
+app.use('/api/categories', categoryRouter);
+app.use('/api/colors', colorRouter);
+app.use('/api/', userRouter);
+app.use('/api/bills', authMiddleware.isAuth, billRouter);
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`)
