@@ -9,9 +9,9 @@ router.get("/users", authMiddleware.isAdmin, userController.user_getAll)
 
 router.get("/user", authMiddleware.isAuth, userController.user_get)
 
-router.delete("/:userId", authMiddleware.isAdmin, userController.user_delete)
+router.delete("user/:userId", authMiddleware.isAdmin, userController.user_delete)
 
-router.patch("/user", authMiddleware.isAuth, userController.user_patch)
+router.patch("/user/:userId", authMiddleware.isAuth, userController.user_patch)
 
 router.post("/register", userController.user_post)
 

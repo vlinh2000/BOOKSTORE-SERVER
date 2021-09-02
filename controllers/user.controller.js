@@ -52,8 +52,11 @@ module.exports = {
         }
     },
     user_patch: async (req, res) => {
-        const { _id } = req.user;
+        const { _id, key } = req.user;
+        const { userId } = req.params;
         try {
+            if (userId !== _id || key !== 0) res.status(404).json({ message: "You can update your account" })
+
             const user = await userModel.findOne({ _id });
             if (!user) res.status(404).json({ message: "User is not exists!" });
 
