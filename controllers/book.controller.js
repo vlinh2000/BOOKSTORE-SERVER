@@ -4,15 +4,24 @@ const categoryModel = require("../models/category.model");
 module.exports = {
     book_getAll: async (req, res) => {
         try {
-            const { page, limit } = req.query;
-            let books = await bookModel.find();
+            const { _page, _limit, categoryId, bookId } = req.query;
 
-            if (page && limit) {
-                const totalPage = Math.ceil(books.length / limit);
-                books = books.slice((page - 1) * limit, page * limit);
-                res.status(200).json({ message: "Fetch success!", books, page, limit, totalPage });
+            let books = [];
+            // handle for pagination
+            if (_page && _limit) {
+                books = await bookModel.find();
+                const _totalPage = Math.ceil(books.length / _limit);
+                books = books.slice((_page - 1) * _limit, _page * _limit);
+                return res.status(200).json({ message: "Fetch success!", books, _page, _limit, _totalPage });
+            }
+            // handle for related product
+            if (_limit && categoryId && bookId) {
+                books = await bookModel.find({ $and: [{ categoryId: categoryId }, { _id: { $ne: bookId } }] }).limit(parseInt(_limit));
+                return res.status(200).json({ message: "Fetch success!", books });
             }
 
+
+            books = await bookModel.find();
             res.status(200).json({ message: "Fetch success!", books });
         } catch (error) {
             res.status(409).json({ message: "Faild to fetch data", error: error.message })
@@ -22,7 +31,7 @@ module.exports = {
         const { bookId } = req.params;
         try {
             const book = await bookModel.findOne({ _id: bookId });
-            if (!book) res.status(404).json({ message: "Book is not exists" })
+            if (!book) return res.status(404).json({ message: "Book is not exists" })
 
             res.status(200).json({ message: "Fetch success!", book });
         } catch (error) {
@@ -40,9 +49,9 @@ module.exports = {
             const category = await categoryModel.findById(categoryId);
             const bookName = await bookModel.findOne({ name: req?.name });
 
-            if (!category) res.status(404).json({ message: "Category is not exists!" });
+            if (!category) return res.status(404).json({ message: "Category is not exists!" });
 
-            if (bookName) res.status(404).json({ message: "Book already exists!" });
+            if (bookName) return res.status(404).json({ message: "Book already exists!" });
 
             const newBook = new bookModel({
                 ...fakeData                            // change if run truth
@@ -57,10 +66,10 @@ module.exports = {
         const { bookId } = req.params;
         try {
             const book = await bookModel.findOne({ _id: bookId });
-            if (!book) res.status(404).json({ message: "Book is not exists!" });
+            if (!book) return res.status(404).json({ message: "Book is not exists!" });
 
             await bookModel.deleteOne({ _id: bookId })
-            res.status(200).json({ message: "Delete a book successful!" });
+            return res.status(200).json({ message: "Delete a book successful!" });
 
         } catch (error) {
             res.status(409).json({ message: "Faild to delete book", error })
@@ -71,7 +80,7 @@ module.exports = {
         try {
 
             const book = await bookModel.findOne({ _id: bookId });
-            if (!book) res.status(404).json({ message: "Book is not exists!" });
+            if (!book) return res.status(404).json({ message: "Book is not exists!" });
 
             await bookModel.updateOne({ _id: bookId }, { $set: { ...req.body } })
             res.status(200).json({ message: "Update a book successful!" });

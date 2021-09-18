@@ -4,13 +4,14 @@ const app = express();
 const mongoose = require('mongoose');
 require('dotenv').config();
 
+app.use(cors());
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
-app.use(cors());
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8000;
 
 const bookRouter = require('./routers/book.route');
+const feedBackRouter = require('./routers/feedBack.route');
 const categoryRouter = require('./routers/category.route');
 const colorRouter = require('./routers/color.route');
 const userRouter = require('./routers/user.route');
@@ -24,10 +25,11 @@ const authMiddleware = require('./middleware/authMiddleware');
 
 app.use(express.static('public'));
 
+app.use('/api/user', userRouter);
 app.use('/api/books', bookRouter);
+app.use('/api/feedBack', feedBackRouter);
 app.use('/api/categories', categoryRouter);
 app.use('/api/colors', colorRouter);
-app.use('/api/', userRouter);
 app.use('/api/bills', authMiddleware.isAuth, billRouter);
 
 app.listen(port, () => {

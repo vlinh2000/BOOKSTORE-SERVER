@@ -34,16 +34,13 @@ module.exports = {
         try {
             // const { totalPrice } = req.body;
             const { id } = req.user;
-            const products = [{ name: "book test", prices: [{ color: "Red", price: 19000 }], num: 10 }]
-            const fakeData = { totalPrice: 190000, uid: id, products }
 
-            const newBill = new billModel({ ...fakeData });
+            const newBill = new billModel({ ...req.body, uid: id });
             await newBill.save()
             return res.status(200).json({ message: "Add bill successfully" })
 
         } catch (error) {
             return res.status(500).json({ message: "Faild to add bills !", error: error.message })
-
         }
     },
     bill_patch: async (req, res) => {

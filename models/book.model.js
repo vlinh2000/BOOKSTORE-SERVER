@@ -3,10 +3,10 @@ const mongoose = require("mongoose");
 const bookSchema = new mongoose.Schema({
     name: { type: String, required: true },
     author: { type: String, required: true },
-    evaluate: [Object],
-    likedBy: [String],
     categoryId: { type: String, required: true },
-    prices: [Object],
+    price: { type: Number, required: true },
+    decription: { type: String, required: true },
+    stockQuantity: { type: Number, required: true }
 })
 
 
