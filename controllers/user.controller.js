@@ -85,7 +85,7 @@ module.exports = {
                     id: user._id,
                     key: user.key,
                     avatar: user.avatar
-                }, process.env.SECRET_TOKEN, { expiresIn: '1d' });
+                }, process.env.SECRET_TOKEN, { expiresIn: '365d' });
 
                 const refreshToken = await jwt.sign({
                     name: user.name,
