@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router()
+const upload = require('../multer')
+
 const userController = require("../controllers/user.controller")
 
 const authMiddleware = require('../middleware/authMiddleware');
@@ -10,9 +12,9 @@ router.get("/users", authMiddleware.isAdmin, userController.user_getAll)
 
 router.get("/", authMiddleware.isAuth, userController.user_get)
 
-router.delete("user/:userId", authMiddleware.isAdmin, userController.user_delete)
+router.delete("/:userId", authMiddleware.isAdmin, userController.user_delete)
 
-router.patch("/user/:userId", authMiddleware.isAuth, userController.user_patch)
+router.patch("/:userId", authMiddleware.isAuth, upload.single("avatar"), userController.user_patch)
 
 router.post("/register", userController.user_post)
 

@@ -12,6 +12,7 @@ let isAuth = async (req, res, next) => {
                 return;
             }
             req.user = decoded;
+            console.log(decoded);
             next();
         })
         // return res.status(400).json({ message: "Token expired!" })

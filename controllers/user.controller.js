@@ -52,17 +52,19 @@ module.exports = {
         }
     },
     user_patch: async (req, res) => {
-        const { _id, key } = req.user;
+        const avatar = req.file?.path ? `${process.env.REACT_APP_API_URL}/${req.file?.path.split('\\').slice(1).join("/")}` : '';
+        const { id, key } = req.user;
         const { userId } = req.params;
-        try {
-            if (userId !== _id || key !== 0) res.json({ message: "You can only update your account" })
 
-            const user = await userModel.findOne({ _id });
-            if (!user) res.status(404).json({ message: "User is not exists!" });
+        try {
+            if (userId !== id || (userId !== id && key !== 0)) return res.status(404).json({ message: "You can only update your account" })
+
+            const user = await userModel.findOne({ _id: id });
+            if (!user) return res.status(404).json({ message: "User is not exists!" });
 
             delete req.body.userName;
             if (req.body.passWord) req.body.passWord = await bcrypt.hash(req.body.passWord, 10);
-            await userModel.updateOne({ _id: userId }, { $set: { ...req.body } })
+            await userModel.findOneAndUpdate({ _id: userId }, { ...req.body, avatar })
 
             res.json({ message: "Update a user successful!" });
         } catch (error) {
@@ -84,14 +86,14 @@ module.exports = {
                     name: user.name,
                     id: user._id,
                     key: user.key,
-                    avatar: user.avatar
+                    avatar: user.avatar || ''
                 }, process.env.SECRET_TOKEN, { expiresIn: '365d' });
 
                 const refreshToken = await jwt.sign({
                     name: user.name,
                     id: user._id,
                     key: user.key,
-                    avatar: user.avatar
+                    avatar: user.avatar || ''
                 }, process.env.REFRESH_SECRET_TOKEN, { expiresIn: '7d' })
 
                 return res.json({ message: 'Login successfully', token, refreshToken })

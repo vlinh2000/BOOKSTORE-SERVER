@@ -29,12 +29,13 @@ module.exports = {
     feedBack_post: async (req, res) => {
         try {
 
-            const { id, name } = req.user;
+            const { id, name, avatar } = req.user;
             const { voted, message, bookId } = req.body;
 
             const newFeedBack = {
                 uid: id,
                 name,
+                avatar,
                 voted,
                 feedBackMessage: message,
                 createAt: now()
@@ -53,7 +54,8 @@ module.exports = {
             res.status(200).json({ message: "Thanks for your feedback!" });
 
         } catch (error) {
-            res.status(409).json({ message: "Faild to feedback", error })
+            console.log(error.message);
+            // res.status(409).json({ message: "Faild to feedback", error: error.message })
         }
     },
     // color_delete: async (req, res) => {

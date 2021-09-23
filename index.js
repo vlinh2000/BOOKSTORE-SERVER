@@ -4,6 +4,7 @@ const app = express();
 const mongoose = require('mongoose');
 require('dotenv').config();
 
+
 app.use(cors());
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
@@ -23,8 +24,8 @@ mongoose.connect("mongodb://localhost/bookstore");
 //middleware 
 const authMiddleware = require('./middleware/authMiddleware');
 
-app.use(express.static('public'));
 
+app.use('/api', express.static('public'));
 app.use('/api/user', userRouter);
 app.use('/api/books', bookRouter);
 app.use('/api/feedBack', feedBackRouter);
