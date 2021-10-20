@@ -12,7 +12,6 @@ let isAuth = async (req, res, next) => {
                 return;
             }
             req.user = decoded;
-            console.log(decoded);
             next();
         })
         // return res.status(400).json({ message: "Token expired!" })
@@ -25,11 +24,11 @@ const isAdmin = async (req, res, next) => {
     if (accessToken) {
         try {
             const data = await jwt.verify(accessToken, process.env.SECRET_TOKEN);
+            if (data.key !== 0) return res.status(400).json({ message: "You have not access permission!" })
+            next();
         } catch (error) {
             return res.status(400).json({ message: "Token expired!" })
         }
-        if (data.key !== 0) return res.status(400).json({ message: "You have not access permission!" })
-        next();
     } else return res.status(400).json({ message: "No token provider!" })
 }
 

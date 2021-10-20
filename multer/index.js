@@ -5,8 +5,10 @@ const storage = multer.diskStorage({
         cb(null, './public/images/')
     },
     filename: function (req, file, cb) {
-        //format filename : avatar + id + .png /.jpeg
-        cb(null, `avatar${req.user.id}.` + file.originalname.split('.')[1])
+
+        //format filename : bookname +  .png /.jpeg
+        const index = Math.ceil(Math.random() * 100000000);
+        cb(null, `image${index}.` + file.mimetype.split('/')[1]);
     }
 })
 

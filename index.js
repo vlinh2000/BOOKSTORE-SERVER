@@ -19,7 +19,11 @@ const userRouter = require('./routers/user.route');
 const billRouter = require('./routers/bill.route');
 
 //connect db
-mongoose.connect("mongodb://localhost/bookstore");
+mongoose.connect(process.env.MONGO_CONNECTION, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
+    console.log("Connect succesfully")
+}, error => {
+    console.log("Connection failed ");
+});
 
 //middleware 
 const authMiddleware = require('./middleware/authMiddleware');

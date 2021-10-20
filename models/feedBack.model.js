@@ -6,4 +6,4 @@ const feedBackSchema = new mongoose.Schema({
     comments: [Object],
 });
 
-module.exports = mongoose.model("feedBack", feedBackSchema, "feedBack");
+module.exports = mongoose.model("feedBack", feedBackSchema);

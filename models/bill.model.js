@@ -18,4 +18,4 @@ const billSchema = new mongoose.Schema({
     receivedDate: Date
 });
 
-module.exports = mongoose.model("bills", billSchema, "bills");
+module.exports = mongoose.model("bills", billSchema);
