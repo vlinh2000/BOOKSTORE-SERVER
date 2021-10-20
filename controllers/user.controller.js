@@ -17,9 +17,9 @@ module.exports = {
                     key: user.key
                 }));
 
-            res.json({ message: "Fetch success!", users });
+            res.json({ message: "Fetch successfully!", users });
         } catch (error) {
-            res.status(500).json({ message: "Faild to fetch data", error })
+            res.status(500).json({ message: "Fetch data failed", error })
         }
     },
     user_get: async (req, res) => {
@@ -27,36 +27,36 @@ module.exports = {
 
         try {
             const user = await userModel.findOne({ _id: id });
-            res.json({ message: "Fetch success!", user });
+            res.json({ message: "Fetch successfully!", user });
         } catch (error) {
-            res.status(500).json({ message: "Faild to fetch data", error })
+            res.status(500).json({ message: "Fetch data failed", error })
         }
     },
     user_post: async (req, res) => {
 
         try {
             const isUserName = await userModel.findOne({ userName: req.body.userName });
-            if (isUserName) return res.status(404).json({ message: "User already exists!" });
+            if (isUserName) return res.status(404).json({ message: "User has already exist!" });
 
             const hashPassWord = await bcrypt.hash(req.body.passWord, 10);
             delete req.body.key; //when people use postman
             const newUser = new userModel({ ...req.body, passWord: hashPassWord })
             await newUser.save();
-            return res.status(201).json({ message: "Create a user successful!" });
+            return res.status(201).json({ message: "Add new user successful!" });
         } catch (error) {
-            return res.status(400).json({ message: "Faild to insert user" }) // 400 that mean wrong input from client
+            return res.status(400).json({ message: "Add new user failed" }) // 400 that mean wrong input from client
         }
     },
     user_delete: async (req, res) => {
         const { userId } = req.params;
         try {
             const user = await userModel.findOne({ _id: userId });
-            if (!user) return res.status(404).json({ message: "User is not exists!" });
+            if (!user) return res.status(404).json({ message: "User does not exist!" });
 
             await userModel.deleteOne({ _id: userId })
-            res.json({ message: "Delete a user successful!" });
+            res.json({ message: "Delete user successfully!" });
         } catch (error) {
-            res.status(400).json({ message: "Faild to delete user" })
+            res.status(400).json({ message: "Delete user failed" })
         }
     },
     user_patch: async (req, res) => {
@@ -68,22 +68,22 @@ module.exports = {
             if (userId !== id || (userId !== id && key !== 0)) return res.status(404).json({ message: "You can only update your account" })
 
             const user = await userModel.findOne({ _id: id });
-            if (!user) return res.status(404).json({ message: "User is not exists!" });
+            if (!user) return res.status(404).json({ message: "User does not exist!" });
 
             delete req.body.userName;
             if (req.body.passWord) req.body.passWord = await bcrypt.hash(req.body.passWord, 10);
             await userModel.findOneAndUpdate({ _id: userId }, { ...req.body, avatar })
 
-            res.json({ message: "Update a user successful!" });
+            res.json({ message: "Update user successfully!" });
         } catch (error) {
-            res.status(400).json({ message: "Faild to update user" })
+            res.status(400).json({ message: "Update user faild" })
         }
     },
     user_login: async (req, res) => {
         try {
             const user = await userModel.findOne({ userName: req.body.userName });
 
-            if (!user) return res.status(401).json({ message: "User is not exists" })
+            if (!user) return res.status(401).json({ message: "User does not exist" })
 
             const result = await bcrypt.compare(req.body.passWord, user.passWord)
 
@@ -110,7 +110,7 @@ module.exports = {
             }
 
         } catch (error) {
-            return res.status(400).json({ message: 'Faild to login!' })
+            return res.status(400).json({ message: 'Login failed!' })
 
         }
     },
