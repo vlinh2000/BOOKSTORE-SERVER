@@ -60,23 +60,36 @@ module.exports = {
         }
     },
     user_patch: async (req, res) => {
-        const avatar = req.file?.path ? `${process.env.REACT_APP_API_URL}/${req.file?.path.split('\\').slice(1).join("/")}` : '';
-        const { id, key } = req.user;
-        const { userId } = req.params;
 
         try {
+
+            const { id, key } = req.user;
+            const { userId } = req.params;
+            const avatar = req.file?.path && `${process.env.REACT_APP_API_URL}/${req.file?.path.split('\\').slice(1).join("/")}`;
+
             if (userId !== id || (userId !== id && key !== 0)) return res.status(404).json({ message: "You can only update your account" })
 
             const user = await userModel.findOne({ _id: id });
             if (!user) return res.status(404).json({ message: "User does not exist!" });
 
-            delete req.body.userName;
-            if (req.body.passWord) req.body.passWord = await bcrypt.hash(req.body.passWord, 10);
-            await userModel.findOneAndUpdate({ _id: userId }, { ...req.body, avatar })
+            const {
+                name, email, phone, address
+            } = req.body;
 
+            const fieldValid = { name, email, phoneNumber: phone, address };
+            let fieldUpdate = avatar ? { avatar } : {};
+
+            for (let key in fieldValid) {
+                if (fieldValid[key] !== undefined) fieldUpdate = { ...fieldUpdate, [key]: fieldValid[key] }
+            }
+
+            console.log(fieldUpdate);
+
+            // if (req.body.passWord) req.body.passWord = await bcrypt.hash(req.body.passWord, 10);
+            await userModel.findOneAndUpdate({ _id: userId }, { ...fieldUpdate })
             res.json({ message: "Update user successfully!" });
         } catch (error) {
-            res.status(400).json({ message: "Update user faild" })
+            res.status(400).json({ message: "Update user faild", error: error.message })
         }
     },
     user_login: async (req, res) => {
@@ -101,7 +114,7 @@ module.exports = {
                     id: user._id,
                     key: user.key,
                     avatar: user.avatar || ''
-                }, process.env.REFRESH_SECRET_TOKEN, { expiresIn: '7d' })
+                }, process.env.REFRESH_SECRET_TOKEN, { expiresIn: '365d' })
 
                 return res.json({ message: 'Login successfully', token, refreshToken })
 

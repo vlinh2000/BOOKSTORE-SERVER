@@ -1,3 +1,4 @@
+const moment = require("moment");
 const mongoose = require("mongoose");
 
 const billSchema = new mongoose.Schema({
@@ -14,8 +15,8 @@ const billSchema = new mongoose.Schema({
     receiver: String,
     phoneReceiver: String,
 
-    deliverDate: Date,
-    receivedDate: Date
+    deliveryDate: { type: Date, default: moment().format() },
+    receivedDate: { type: Date, default: null }
 });
 
 module.exports = mongoose.model("bills", billSchema);

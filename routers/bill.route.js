@@ -12,7 +12,7 @@ router.post("/", isAuth, billController.bill_post)
 
 // router.patch("/:billId", billController.bill_patch)
 
-// router.delete("/:billId", isAuth, billController.bill_delete)
+router.delete("/:billId", isAuth, billController.bill_delele)
 
 
 module.exports = router;
