@@ -1,4 +1,5 @@
 const billModel = require("../models/bill.model")
+const moment = require("moment")
 
 module.exports = {
     bill_getAll: async (req, res) => {
@@ -11,7 +12,7 @@ module.exports = {
             let bills = []
             bills = await billModel.find({ uid: id });
             //Is Admin
-            if (key === 0) bills = await billModel.find({ $or: [{ status: "Đang vận chuyển" }, { status: "Đã giao" }] });
+            if (key === 0) bills = await billModel.find();
 
             return res.status(200).json({ message: "Fetch successfully!", bills })
 
@@ -37,8 +38,23 @@ module.exports = {
         try {
             // const { totalPrice } = req.body;
             const { id } = req.user;
+            const {
+                products,
+                totalPrice,
+                pay,
+                traddingCode,
+                address,
+                receiver,
+                phoneReceiver,
+            } = req.body;
 
-            const newBill = new billModel({ ...req.body, uid: id });
+            let newBill;
+            if (pay) {
+                newBill = new billModel({ products, totalPrice, pay, traddingCode, address, receiver, phoneReceiver, uid: id });
+            } else {
+                newBill = new billModel({ products, totalPrice, address, receiver, phoneReceiver, uid: id });
+
+            }
             await newBill.save()
             return res.status(200).json({ message: "Add bill successfully" })
 
@@ -49,9 +65,8 @@ module.exports = {
     bill_patch: async (req, res) => {
 
         try {
-            let status = "Đang vận chuyển";
 
-            const statusFromUser = req.body.status;
+            const { status } = req.body;
 
             const { billId } = req.params;
             const { key } = req.user
@@ -59,12 +74,14 @@ module.exports = {
             const bill = await billModel.findById(billId);
             if (!bill) return res.status(400).json({ message: "Bill does not exist !" })
 
-            if (key !== 0 && (statusFromUser == 'Đã hủy' || statusFromUser == 'Đã nhận hàng')) status = statusFromUser;
+            if (key !== 0 && (status !== 'Canceled' || status !== 'Received')) return res.status(500).json({ message: "Not permission!" })
 
-            await billModel.updateOne({ _id: billId }, { $set: { status: status } })
-            return res.status(200).json({ message: "Confirmed bill !" })
+            const receivedDate = req.body.receivedDate ? req.body.receivedDate : moment().add(3, 'days');
+            await billModel.updateOne({ _id: billId }, { $set: { status, receivedDate } })
+            return res.status(200).json({ message: "Update bill successfully! !" })
         } catch (error) {
-            return res.status(500).json({ message: "Update bill successfully!" })
+            console.log(error.message)
+            return res.status(500).json({ message: "Update bill failed!" })
 
         }
 

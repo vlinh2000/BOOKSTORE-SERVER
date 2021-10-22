@@ -83,7 +83,7 @@ module.exports = {
                 if (fieldValid[key] !== undefined) fieldUpdate = { ...fieldUpdate, [key]: fieldValid[key] }
             }
 
-            console.log(fieldUpdate);
+            // console.log(fieldUpdate);
 
             // if (req.body.passWord) req.body.passWord = await bcrypt.hash(req.body.passWord, 10);
             await userModel.findOneAndUpdate({ _id: userId }, { ...fieldUpdate })

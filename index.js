@@ -11,12 +11,12 @@ app.use(express.urlencoded({ extended: true })) // for parsing application/x-www
 
 const port = process.env.PORT || 8000;
 
-const bookRouter = require('./routers/book.route');
-const feedBackRouter = require('./routers/feedBack.route');
-const categoryRouter = require('./routers/category.route');
-const colorRouter = require('./routers/color.route');
-const userRouter = require('./routers/user.route');
-const billRouter = require('./routers/bill.route');
+const bookRouter = require('./routes/book.route');
+const feedBackRouter = require('./routes/feedBack.route');
+const categoryRouter = require('./routes/category.route');
+const colorRouter = require('./routes/color.route');
+const userRouter = require('./routes/user.route');
+const billRouter = require('./routes/bill.route');
 
 //connect db
 mongoose.connect(process.env.MONGO_CONNECTION, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {

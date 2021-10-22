@@ -10,7 +10,7 @@ router.get("/:billId", isAuth, billController.bill_get)
 
 router.post("/", isAuth, billController.bill_post)
 
-// router.patch("/:billId", billController.bill_patch)
+router.patch("/:billId", billController.bill_patch)
 
 router.delete("/:billId", isAuth, billController.bill_delele)
 

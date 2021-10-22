@@ -7,7 +7,7 @@ const billSchema = new mongoose.Schema({
     uid: { type: String, required: true },
 
     discount: { type: Number, default: 0 },
-    status: { type: String, default: "Chờ xác nhận" },
+    status: { type: String, default: "Pending" },
     pay: { type: Boolean, default: false },
     traddingCode: { type: String, default: '' },
 
@@ -15,7 +15,7 @@ const billSchema = new mongoose.Schema({
     receiver: String,
     phoneReceiver: String,
 
-    deliveryDate: { type: Date, default: moment().format() },
+    createAt: { type: Date, default: moment().format() },
     receivedDate: { type: Date, default: null }
 });
 
