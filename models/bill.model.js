@@ -1,3 +1,4 @@
+const { now } = require("moment");
 const moment = require("moment");
 const mongoose = require("mongoose");
 
@@ -15,7 +16,7 @@ const billSchema = new mongoose.Schema({
     receiver: String,
     phoneReceiver: String,
 
-    createAt: { type: Date, default: moment().format() },
+    createAt: { type: Date },
     receivedDate: { type: Date, default: null }
 });
 

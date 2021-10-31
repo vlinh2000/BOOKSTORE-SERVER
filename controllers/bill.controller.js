@@ -50,9 +50,10 @@ module.exports = {
 
             let newBill;
             if (pay) {
-                newBill = new billModel({ products, totalPrice, pay, traddingCode, address, receiver, phoneReceiver, uid: id });
+                newBill = new billModel({ products, totalPrice, pay, traddingCode, address, receiver, phoneReceiver, uid: id, createAt: Date.now() });
+
             } else {
-                newBill = new billModel({ products, totalPrice, address, receiver, phoneReceiver, uid: id });
+                newBill = new billModel({ products, totalPrice, address, receiver, phoneReceiver, uid: id, createAt: Date.now() });
 
             }
             await newBill.save()
