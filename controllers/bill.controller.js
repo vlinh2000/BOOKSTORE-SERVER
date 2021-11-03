@@ -1,6 +1,9 @@
 const billModel = require("../models/bill.model")
 const moment = require("moment")
 
+
+
+
 module.exports = {
     bill_getAll: async (req, res) => {
 
@@ -47,13 +50,12 @@ module.exports = {
                 receiver,
                 phoneReceiver,
             } = req.body;
-
             let newBill;
             if (pay) {
-                newBill = new billModel({ products, totalPrice, pay, traddingCode, address, receiver, phoneReceiver, uid: id, createAt: Date.now() });
+                newBill = new billModel({ products, totalPrice, pay, traddingCode, address, receiver, phoneReceiver, uid: id, createAt: moment().format() });
 
             } else {
-                newBill = new billModel({ products, totalPrice, address, receiver, phoneReceiver, uid: id, createAt: Date.now() });
+                newBill = new billModel({ products, totalPrice, address, receiver, phoneReceiver, uid: id, createAt: moment().format() });
 
             }
             await newBill.save()
@@ -66,24 +68,30 @@ module.exports = {
     bill_patch: async (req, res) => {
 
         try {
-
             const { status } = req.body;
-
             const { billId } = req.params;
-            const { key } = req.user
+            const { key, id } = req.user
 
-            const bill = await billModel.findById(billId);
+            const bill = await billModel.find({ _id: billId, uid: id });
             if (!bill) return res.status(400).json({ message: "Bill does not exist !" })
 
-            if (key !== 0 && (status !== 'Canceled' || status !== 'Received')) return res.status(500).json({ message: "Not permission!" })
+            if (key !== 0 && (status !== 'Canceled' && status !== 'Delivered')) return res.status(500).json({ message: "Not permission!" })
 
-            const receivedDate = req.body.receivedDate ? req.body.receivedDate : moment().add(3, 'days');
-            await billModel.updateOne({ _id: billId }, { $set: { status, receivedDate } })
+            switch (status) {
+                case 'Delivered': {
+                    await billModel.updateOne({ _id: billId }, { $set: { status, pay: true, receivedDate: moment().format() } });
+                }
+                case 'Canceled': {
+                    await billModel.updateOne({ _id: billId }, { $set: { status, canceledDate: moment().format() } });
+                }
+                default: {
+                    await billModel.updateOne({ _id: billId }, { $set: { status } });
+                }
+            }
             return res.status(200).json({ message: "Update bill successfully! !" })
         } catch (error) {
             console.log(error.message)
             return res.status(500).json({ message: "Update bill failed!" })
-
         }
 
     }, bill_delele: async (req, res) => {

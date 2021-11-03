@@ -1,9 +1,7 @@
-const { now } = require("moment");
-const moment = require("moment");
 const mongoose = require("mongoose");
 
 const billSchema = new mongoose.Schema({
-    products: [mongoose.Schema.Types.Mixed],
+    products: [{ type: Object }],
     totalPrice: { type: Number, required: true },
     uid: { type: String, required: true },
 
@@ -16,8 +14,9 @@ const billSchema = new mongoose.Schema({
     receiver: String,
     phoneReceiver: String,
 
-    createAt: { type: Date },
-    receivedDate: { type: Date, default: null }
+    createAt: { type: String },
+    receivedDate: { type: String },
+    canceledDate: { type: String }
 });
 
 module.exports = mongoose.model("bills", billSchema);
