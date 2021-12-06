@@ -73,10 +73,10 @@ module.exports = {
             if (!user) return res.status(404).json({ message: "User does not exist!" });
 
             const {
-                name, email, phone, address
+                name, email, phoneNumber, address
             } = req.body;
 
-            const fieldValid = { name, email, phoneNumber: phone, address };
+            const fieldValid = { name, email, phoneNumber, address };
             let fieldUpdate = avatar ? { avatar } : {};
 
             for (let key in fieldValid) {

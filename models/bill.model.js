@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const billSchema = new mongoose.Schema({
     products: [{ type: Object }],
     totalPrice: { type: Number, required: true },
-    uid: { type: String, required: true },
+    uid: { type: String, required: true, ref: "users" },
 
     discount: { type: Number, default: 0 },
     status: { type: String, default: "Pending" },

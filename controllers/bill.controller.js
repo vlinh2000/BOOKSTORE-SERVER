@@ -10,8 +10,69 @@ module.exports = {
         try {
             const { key, id } = req.user;
 
-            // default Is user
+            const { topcustomerNumber, revenue } = req.query;
 
+            //handle topcustomer admin page
+            if (topcustomerNumber && key === 0) {
+                const topCustomers = await billModel.aggregate([
+                    { "$match": { "$expr": { "$or": [{ "$eq": ["$status", "Shipping"] }, { "$eq": ["$status", "Delivered"] }] } } },
+                    { "$group": { "_id": { "uid": "$uid", "receiver": "$receiver" }, "bought": { "$sum": 1 }, "totalSubPrice": { "$sum": "$totalPrice" }, "phone": { "$first": "$phoneReceiver" } } },
+                    { "$group": { "_id": "$_id.uid", "total": { "$sum": "$bought" }, "totalPrice": { "$sum": "$totalSubPrice" }, "receivers": { "$addToSet": { "name": "$_id.receiver", "phone": "$phone", "totalSubPrice": "$totalSubPrice", "bought": "$bought" } } } },
+                    { "$set": { uid: { $toObjectId: "$_id" } } },
+                    {
+                        "$lookup": {
+                            "from": "users",
+                            "let": { "id": "$uid" },
+                            "pipeline": [
+                                { "$match": { "$expr": { "$eq": ["$_id", "$$id"] } } },
+                                { "$project": { "name": 1, "avatar": 1, "phoneNumber": 1, "address": 1 } }
+                            ],
+                            "as": "accountInfo"
+                        }
+                    },
+                    {
+                        "$sort": { totalPrice: -1 }
+                    },
+                    {
+                        "$limit": parseInt(topcustomerNumber)
+                    }
+                ])
+                return res.status(200).json({ message: "Fetch successfully!", topCustomers })
+            }
+            //handle revenue admin page 
+            if (revenue && key === 0) {
+                const revenues = await billModel.aggregate([
+                    {
+                        "$match": {
+                            "$expr": {
+                                "$and":
+                                    [
+                                        { "$or": [{ "$eq": ["$status", "Shipping"] }, { "$eq": ["$status", "Delivered"] }] },
+                                        { "$eq": [{ "$year": { "$toDate": "$createAt" } }, parseInt(revenue)] }
+                                    ]
+                            }
+                        }
+                    },
+                    {
+                        "$group": {
+                            "_id": {
+                                month: { $month: { "$toDate": "$createAt" } }
+                            }, "totalPrice": { "$sum": "$totalPrice" }
+                        }
+                    },
+                    {
+                        "$sort": { "_id.month": 1 }
+                    }
+                ])
+
+                let groupBillByMonth = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                revenues.forEach((revenue) => {
+                    groupBillByMonth[revenue._id.month - 1] = parseFloat(revenue.totalPrice).toFixed(2);
+                });
+                return res.status(200).json({ message: "Fetch successfully!", revenues: groupBillByMonth })
+            }
+
+            // default Is user
             let bills = []
             bills = await billModel.find({ uid: id });
             //Is Admin
@@ -23,7 +84,9 @@ module.exports = {
             console.log(error)
             return res.status(500).json({ message: "Fetch bills failed", error })
         }
+
     },
+
     bill_get: async (req, res) => {
 
         try {

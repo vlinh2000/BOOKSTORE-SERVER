@@ -14,7 +14,7 @@ const port = process.env.PORT || 8000;
 const bookRouter = require('./routes/book.route');
 const feedBackRouter = require('./routes/feedBack.route');
 const categoryRouter = require('./routes/category.route');
-const colorRouter = require('./routes/color.route');
+const filterRouter = require('./routes/filter.route');
 const userRouter = require('./routes/user.route');
 const billRouter = require('./routes/bill.route');
 
@@ -34,7 +34,7 @@ app.use('/api/user', userRouter);
 app.use('/api/books', bookRouter);
 app.use('/api/feedBack', feedBackRouter);
 app.use('/api/categories', categoryRouter);
-app.use('/api/colors', colorRouter);
+app.use('/api/filter', filterRouter);
 app.use('/api/bills', authMiddleware.isAuth, billRouter);
 
 app.listen(port, () => {

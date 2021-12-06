@@ -14,5 +14,4 @@ router.patch("/:billId", isAuth, billController.bill_patch)
 
 router.delete("/:billId", isAuth, billController.bill_delele)
 
-
 module.exports = router;
