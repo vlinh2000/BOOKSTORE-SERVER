@@ -1,6 +1,7 @@
 const bookModel = require("../models/book.model");
 const categoryModel = require("../models/category.model");
 const feedBackModel = require("../models/feedBack.model");
+const mongoose = require("mongoose");
 
 module.exports = {
     book_getAll: async (req, res) => {
@@ -17,13 +18,72 @@ module.exports = {
             }
             // handle for related product
             if (_limit && categoryId && bookId) {
-                books = await bookModel.find({ $and: [{ categoryId: categoryId }, { _id: { $ne: bookId } }] }).limit(parseInt(_limit));
+                // books = await bookModel.find({ $and: [{ categoryId: categoryId }, { _id: { $ne: bookId } }] }).limit(parseInt(_limit));
+                books = await bookModel.aggregate([
+                    {
+                        $set: { bookId: { $toString: "$_id" }, categoryId: { $toObjectId: "$category" } }
+                    },
+                    {
+                        $match: {
+                            $expr:
+                            {
+                                $and: [
+                                    { $eq: ["$category", categoryId] },
+                                    { $ne: ["$bookId", bookId] },
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "feedbacks",
+                            localField: "bookId",
+                            foreignField: "bookId",
+                            as: "feedBack"
+                        }
+                    }
+                    ,
+                    {
+                        $lookup: {
+                            from: "categories",
+                            localField: "categoryId",
+                            foreignField: "_id",
+                            as: "category"
+                        }
+                    },
+                    {
+                        $limit: parseInt(_limit)
+                    }
+                ])
+
+
+
                 return res.status(200).json({ message: "Fetch success!", books });
             }
 
+            books = await bookModel.aggregate([
+                {
+                    $set: { bookId: { $toString: "$_id" }, categoryId: { $toObjectId: "$category" } }
+                },
+                {
+                    $lookup: {
+                        from: "feedbacks",
+                        localField: "bookId",
+                        foreignField: "bookId",
+                        as: "feedBack"
+                    }
+                }
+                ,
+                {
+                    $lookup: {
+                        from: "categories",
+                        localField: "categoryId",
+                        foreignField: "_id",
+                        as: "category"
+                    }
+                }
+            ])
 
-
-            books = await bookModel.find().populate("category").exec();
             res.status(200).json({ message: "Fetch success!", books });
         } catch (error) {
             res.status(409).json({ message: "Failed to fetch data", error: error.message })

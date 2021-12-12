@@ -1,4 +1,5 @@
 const billModel = require("../models/bill.model")
+const bookModel = require("../models/book.model")
 const moment = require("moment")
 
 
@@ -76,7 +77,7 @@ module.exports = {
             let bills = []
             bills = await billModel.find({ uid: id });
             //Is Admin
-            if (key === 0) bills = await billModel.find();
+            if (key === 0) bills = await billModel.find().sort({ status: -1 });
 
             return res.status(200).json({ message: "Fetch successfully!", bills })
 
@@ -113,15 +114,26 @@ module.exports = {
                 receiver,
                 phoneReceiver,
             } = req.body;
+            // console.log(products);
+
             let newBill;
             if (pay) {
                 newBill = new billModel({ products, totalPrice, pay, traddingCode, address, receiver, phoneReceiver, uid: id, createAt: moment().format() });
 
             } else {
                 newBill = new billModel({ products, totalPrice, address, receiver, phoneReceiver, uid: id, createAt: moment().format() });
-
             }
+
             await newBill.save()
+
+            //handle stock quantity
+            products.forEach(async product => {
+                await bookModel.updateOne(
+                    { _id: product._id },
+                    { $inc: { stockQuantity: -product.quantity } },
+                )
+            });
+
             return res.status(200).json({ message: "Add bill successfully" })
 
         } catch (error) {
@@ -146,6 +158,16 @@ module.exports = {
                 }
                 case 'Canceled': {
                     await billModel.updateOne({ _id: billId }, { $set: { status, canceledDate: moment().format() } });
+
+                    //handle restore stock quantity
+                    const { products } = bill[0];
+                    products.forEach(async product => {
+                        await bookModel.updateOne(
+                            { _id: product._id },
+                            { $inc: { stockQuantity: product.quantity } },
+                        )
+                    });
+
                 }
                 default: {
                     await billModel.updateOne({ _id: billId }, { $set: { status } });
