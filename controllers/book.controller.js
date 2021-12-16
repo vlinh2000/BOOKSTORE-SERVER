@@ -1,6 +1,8 @@
 const bookModel = require("../models/book.model");
 const categoryModel = require("../models/category.model");
 const feedBackModel = require("../models/feedBack.model");
+const { handleDeleteFile, handleDeleteFiles } = require("../utils/fs");
+
 const mongoose = require("mongoose");
 
 module.exports = {
@@ -11,7 +13,7 @@ module.exports = {
             let books = [];
             // handle for pagination
             if (_page && _limit) {
-                books = await bookModel.find().populate("category").exec();
+                books = await bookModel.find({}).populate("category").exec();
                 const _totalPage = Math.ceil(books.length / _limit);
                 books = books.slice((_page - 1) * _limit, _page * _limit);
                 return res.status(200).json({ message: "Fetch success!", books, _page, _limit, _totalPage });
@@ -107,10 +109,10 @@ module.exports = {
                 category, description, quantity
             } = req.body
 
-            const images = req.files?.map(file => {
-                const url = `${process.env.REACT_APP_API_URL}/${file.path.split('\\').slice(1).join("/")}`;
-                return url;
-            })
+            // const images = req.files?.map(file => {
+            //     const url = file.path.split('\\').slice(1).join("/");
+            //     return url;
+            // })
 
             const hasCategory = await categoryModel.findById(category);
 
@@ -120,11 +122,24 @@ module.exports = {
 
             if (bookName) return res.status(404).json({ message: "Book already exists!" });
 
+            let banner = [];
+            let images = [];
+
+            if (Object.keys(req.files).length === 2) {
+
+                banner = req.files.banner.map(bn => `images/${bn.filename}`);
+                images = req.files.images.map(img => `images/${img.filename}`);
+
+            } else {
+                return res.status(404).json({ message: "Lack information!" });
+            }
+
             const newBook = new bookModel({
                 name, author, category,
                 description, price, stockQuantity: quantity,
-                image: images
+                images, banner: banner[0]
             })
+
             await newBook.save();
             res.status(200).json({ message: "Insert a book successful!" });
         } catch (error) {
@@ -141,7 +156,9 @@ module.exports = {
 
             await bookModel.deleteOne({ _id: bookId })
             await feedBackModel.deleteOne({ bookId })
-
+            book.image.forEach(img => {
+                handleDeleteFile(img);
+            })
             return res.status(200).json({ message: "Delete a book successful!" });
         } catch (error) {
             res.status(409).json({ message: "Failed to delete book", error })
@@ -150,11 +167,10 @@ module.exports = {
     book_patch: async (req, res) => {
         try {
             const { bookId } = req.params;
-            const {
+            let {
                 name, author, price,
-                category, description, quantity
+                category, description, quantity, fileRemove
             } = req.body
-
 
             const book = await bookModel.findOne({ _id: bookId });
             if (!book) return res.status(404).json({ message: "Book is not exists!" });
@@ -171,36 +187,41 @@ module.exports = {
             for (let key in fieldValid) {
                 if (fieldValid[key] !== undefined) fieldUpdate = { ...fieldUpdate, [key]: fieldValid[key] }
             }
-            //handle images file
-            let images = [];
 
-            if (req.files.length > 0) {
-                images = req.files?.map(file => {
-                    const url = `${process.env.REACT_APP_API_URL}/${file.path.split('\\').slice(1).join("/")}`;
-                    return url;
-                })
+            //handle images file
+            let banner = [];
+            let images = book.images;
+            if (fileRemove) {
+                fileRemove = JSON.parse(fileRemove);
+                images = book.images.filter(img => !fileRemove.images?.includes(img))
             }
 
-            let defaultImage = [];
-            if (req.body.image) {
+            if (Object.keys(req.files).length > 0) {
 
-                if (typeof req.body.image === "string") {
-                    req.body.image = [req.body.image]
+                if (req.files.banner?.length > 0) {
+                    banner = req.files.banner.map(bn => `images/${bn.filename}`);
+                    fieldUpdate = { ...fieldUpdate, banner: banner[0] }
                 }
 
-                defaultImage = [...req.body.image];
+                if (req.files.images?.length > 0) {
+                    images = [...images, ...req.files.images.map(img => `images/${img.filename}`)];
+                }
             }
 
-            if (req.body.banner === "true") {
-                images = [...images, ...defaultImage];
-            } else {
-                images = [...defaultImage, ...images];
-            }
-
-            // console.log({ images, defaultImage })
-
-            fieldUpdate = images.length > 0 ? { ...fieldUpdate, image: images } : { ...fieldUpdate }
+            fieldUpdate = images.length > 0 ? { ...fieldUpdate, images } : { ...fieldUpdate }
             await bookModel.updateOne({ _id: bookId }, { $set: { ...fieldUpdate } })
+
+            console.log({ fieldUpdate });
+
+            console.log({ fileRemove });
+            //remove file in public 
+            if (Object.keys(fileRemove).length > 0) {
+                for (let file in fileRemove) {
+                    console.log(file);
+                    // handleDeleteFiles(fileRemove[file]);
+                }
+            }
+
             res.status(200).json({ message: "Update a book successful!" });
         } catch (error) {
             console.log(error)
