@@ -1,14 +1,18 @@
 const multer = require('multer');
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, './public/images/')
-    },
-    filename: function (req, file, cb) {
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
-        //format filename : bookname +  .png /.jpeg
-        const index = Math.ceil(Math.random() * 100000000);
-        cb(null, `image${index}.` + file.mimetype.split('/')[1]);
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_CLOUDINARY_KEY,
+    api_secret: process.env.API_CLOUDINARY_SECRET,
+})
+
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: "images"
     }
 })
 

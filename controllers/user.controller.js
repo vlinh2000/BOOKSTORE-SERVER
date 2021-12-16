@@ -60,12 +60,11 @@ module.exports = {
         }
     },
     user_patch: async (req, res) => {
-
         try {
 
             const { id, key } = req.user;
             const { userId } = req.params;
-            const avatar = req.file?.path && `${process.env.REACT_APP_API_URL}/${req.file?.path.split('\\').slice(1).join("/")}`;
+            const avatar = req.file?.path;
 
             if (userId !== id || (userId !== id && key !== 0)) return res.status(404).json({ message: "You can only update your account" })
 
@@ -84,6 +83,7 @@ module.exports = {
             }
 
             // console.log(fieldUpdate);
+
 
             // if (req.body.passWord) req.body.passWord = await bcrypt.hash(req.body.passWord, 10);
             await userModel.findOneAndUpdate({ _id: userId }, { ...fieldUpdate })

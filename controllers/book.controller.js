@@ -109,10 +109,6 @@ module.exports = {
                 category, description, quantity
             } = req.body
 
-            // const images = req.files?.map(file => {
-            //     const url = file.path.split('\\').slice(1).join("/");
-            //     return url;
-            // })
 
             const hasCategory = await categoryModel.findById(category);
 
@@ -127,8 +123,8 @@ module.exports = {
 
             if (Object.keys(req.files).length === 2) {
 
-                banner = req.files.banner.map(bn => `images/${bn.filename}`);
-                images = req.files.images.map(img => `images/${img.filename}`);
+                banner = req.files.banner.map(bn => bn.path);
+                images = req.files.images.map(img => img.path);
 
             } else {
                 return res.status(404).json({ message: "Lack information!" });
@@ -199,28 +195,26 @@ module.exports = {
             if (Object.keys(req.files).length > 0) {
 
                 if (req.files.banner?.length > 0) {
-                    banner = req.files.banner.map(bn => `images/${bn.filename}`);
+                    banner = req.files.banner.map(bn => bn.path);
                     fieldUpdate = { ...fieldUpdate, banner: banner[0] }
                 }
 
                 if (req.files.images?.length > 0) {
-                    images = [...images, ...req.files.images.map(img => `images/${img.filename}`)];
+                    images = [...images, ...req.files.images.map(img => img.path)];
                 }
             }
 
             fieldUpdate = images.length > 0 ? { ...fieldUpdate, images } : { ...fieldUpdate }
             await bookModel.updateOne({ _id: bookId }, { $set: { ...fieldUpdate } })
 
-            console.log({ fieldUpdate });
 
-            console.log({ fileRemove });
             //remove file in public 
-            if (Object.keys(fileRemove).length > 0) {
-                for (let file in fileRemove) {
-                    console.log(file);
-                    // handleDeleteFiles(fileRemove[file]);
-                }
-            }
+            // if (Object.keys(fileRemove).length > 0) {
+            //     for (let file in fileRemove) {
+            //         console.log(file);
+            //         // handleDeleteFiles(fileRemove[file]);
+            //     }
+            // }
 
             res.status(200).json({ message: "Update a book successful!" });
         } catch (error) {

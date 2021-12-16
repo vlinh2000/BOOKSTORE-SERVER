@@ -12,7 +12,7 @@ router.get("/:paymentId", paymentController.payment_get)
 
 router.post("/", authMiddleware.isAdmin, upload.single("paymentLogo"), paymentController.payment_post)
 
-router.patch("/:paymentId", authMiddleware.isAdmin, paymentController.payment_patch)
+router.patch("/:paymentId", authMiddleware.isAdmin, upload.single("paymentLogo"), paymentController.payment_patch)
 
 router.delete("/:paymentId", authMiddleware.isAdmin, paymentController.payment_delete)
 
