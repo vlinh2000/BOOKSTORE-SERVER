@@ -64,7 +64,7 @@ module.exports = {
 
             const { id, key } = req.user;
             const { userId } = req.params;
-            const avatar = req.file?.path;
+            const avatar = req.file.path;
 
             if (userId !== id || (userId !== id && key !== 0)) return res.status(404).json({ message: "You can only update your account" })
 
@@ -86,7 +86,7 @@ module.exports = {
 
 
             // if (req.body.passWord) req.body.passWord = await bcrypt.hash(req.body.passWord, 10);
-            await userModel.findOneAndUpdate({ _id: userId }, { ...fieldUpdate })
+            await userModel.updateOne({ _id: userId }, { $set: { ...fieldUpdate } })
             res.json({ message: "Update user successfully!" });
         } catch (error) {
             res.status(400).json({ message: "Update user faild", error: error.message })
