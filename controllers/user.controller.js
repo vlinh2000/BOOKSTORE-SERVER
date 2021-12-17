@@ -64,7 +64,7 @@ module.exports = {
 
             const { id, key } = req.user;
             const { userId } = req.params;
-            const avatar = req.file.path;
+            const avatar = req.file?.path;
 
             if (userId !== id || (userId !== id && key !== 0)) return res.status(404).json({ message: "You can only update your account" })
 
