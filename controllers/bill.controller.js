@@ -147,26 +147,34 @@ module.exports = {
             const { billId } = req.params;
             const { key, id } = req.user
 
-            const bill = await billModel.find({ _id: billId, uid: id });
-            if (!bill) return res.status(400).json({ message: "Bill does not exist !" })
 
             if (key !== 0 && (status !== 'Canceled' && status !== 'Delivered')) return res.status(500).json({ message: "Not permission!" })
+
+            let bill;
+            if (key === 0) {
+                bill = await billModel.findOne({ _id: billId });
+            } else {
+                bill = await billModel.findOne({ _id: billId, uid: id });
+            }
+
+            if (!bill) return res.status(400).json({ message: "Bill does not exist !" })
 
             switch (status) {
                 case 'Delivered': {
                     await billModel.updateOne({ _id: billId }, { $set: { status, pay: true, receivedDate: moment().format() } });
                 }
                 case 'Canceled': {
-                    await billModel.updateOne({ _id: billId }, { $set: { status, canceledDate: moment().format() } });
 
                     //handle restore stock quantity
-                    const { products } = bill[0];
+                    // console.log(billId);
+                    const { products } = bill;
                     products.forEach(async product => {
                         await bookModel.updateOne(
                             { _id: product._id },
                             { $inc: { stockQuantity: product.quantity } },
                         )
                     });
+                    await billModel.updateOne({ _id: billId }, { $set: { status, canceledDate: moment().format() } });
 
                 }
                 default: {
