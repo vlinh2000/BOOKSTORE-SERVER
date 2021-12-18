@@ -1,4 +1,10 @@
- - upload img avatar
- - upload book img
-link verify accesstoken social media
-https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=accessToken
+#Book store server
+
+##Knowledge
+
+### `Overview`
+- Express Js.
+- MVC model.
+- Firebase for verify token social media.
+- MongoDB.
+- Cloudinary for store images.
